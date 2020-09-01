@@ -22,7 +22,7 @@ class GraphController extends Controller
     public function retrieveUserProfile(){
         try {
  
-            $params = "first_name,last_name";
+            $params = "id,name";
  
             $user = $this->api->get('/me?fields='.$params)->getGraphUser();
  
@@ -60,4 +60,35 @@ class GraphController extends Controller
 	        dd($e); // handle exception
 	    }
 	}
+
+	public function getPageInfo(){
+        try {
+ 			
+ 			$page_id = '109319207558709';
+            
+            //for page info
+            //$params = "id,name,link,about,category,can_post,has_added_app,tasks,engagement,rating_count";
+            
+            //for feeds page info
+            //$params = "id,created_time,message,from,actions,admin_creator,icon,likes{id,name,profile_type,pic},can_reply_privately,shares,status_type,promotion_status";
+            
+            //for metric insights
+            $metric ="page_impressions";
+            
+            //for page info
+            //$user = $this->api->get('/me/accounts?fields='.$params);
+ 			
+ 			//for feeds page info
+            // $page = $this->api->get('/'.$page_id.'/feed?fields='.$params, $this->getPageAccessToken($page_id));
+
+ 			$insight = $this->api->get('/'.$page_id.'/insights/'.$metric, $this->getPageAccessToken($page_id));
+            
+            // dd($page);
+            dd($insight);
+ 
+        } catch (FacebookSDKException $e) {
+ 			// dd($e);
+        }
+ 
+    }
 }
