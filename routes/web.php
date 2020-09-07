@@ -28,6 +28,5 @@ Route::get('login/fb/callback', 'Auth\LoginController@handleProviderFacebookCall
 Route::group(['middleware' => [
     'auth'
 ]], function(){
-    Route::get('/user', 'GraphController@retrieveUserProfile');
-    Route::get('/page-info', 'GraphController@getPageInfo');
+    Route::get('/page-info', 'GraphController@getInfo');
 });

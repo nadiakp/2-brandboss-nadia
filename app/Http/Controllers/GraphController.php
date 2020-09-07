@@ -19,14 +19,53 @@ class GraphController extends Controller
         });
     }
  
-    public function retrieveUserProfile(){
+    public function getInfo(){
         try {
  
-            $params = "id,name";
- 
-            $user = $this->api->get('/me?fields='.$params)->getGraphUser();
- 
-            dd($user);
+            $params_user = "id,name";
+            
+            $params_page_info = "accounts{id,name,link,about,category,can_post,has_added_app,rating_count}";
+
+            $params_page_feed = "id,message,created_time,from,admin_creator,icon,shares,status_type,promotion_status,likes{id,name,profile_type,pic},actions,can_reply_privately";
+
+            //for metric insights
+            $metric ="page_impressions";
+
+            $user = $this->api->get('/me?fields='.$params_user)->getGraphUser();
+
+            $page_info = $this->api->get('/me?fields='.$params_page_info)->getGraphUser();
+
+            // $page_id = '109319207558709';
+            $page_id = $page_info['accounts']['0']['id'];  
+
+            $page_feed = $this->api->get('/'.$page_id.'/feed?fields='.$params_page_feed, $this->getPageAccessToken($page_id))->getGraphEdge()->asArray();
+
+            $insights = $this->api->get('/'.$page_id.'/insights/'.$metric, $this->getPageAccessToken($page_id))->getGraphEdge()->asArray();
+
+            // dd($page);
+
+            return response()->json([
+                'user info' =>[
+                    'user id' => $user['id'],
+                    'user name' => $user['name'],
+                ],
+                'page info' =>[
+                    'page id' => $page_info['accounts']['0']['id'],
+                    'page name' => $page_info['accounts']['0']['name'],
+                    'page link' => $page_info['accounts']['0']['link'],
+                    'page about' => $page_info['accounts']['0']['about'],
+                    'page category' => $page_info['accounts']['0']['category'],
+                    'can post' => $page_info['accounts']['0']['can_post'],
+                    'has added app' => $page_info['accounts']['0']['has_added_app'],
+                    'rating_count' => $page_info['accounts']['0']['rating_count'],
+                ],
+                'page feeds' => $page_feed,
+                'page insights' =>[
+                    'page impressions per day' => $insights['0'],
+                    'page impressions per week' => $insights['1'],
+                    'page impressions per months' => $insights['2'],
+                ],
+            ], 200);
  
         } catch (FacebookSDKException $e) {
  			// dd($e);
@@ -61,34 +100,4 @@ class GraphController extends Controller
 	    }
 	}
 
-	public function getPageInfo(){
-        try {
- 			
- 			$page_id = '109319207558709';
-            
-            //for page info
-            //$params = "id,name,link,about,category,can_post,has_added_app,tasks,engagement,rating_count";
-            
-            //for feeds page info
-            //$params = "id,created_time,message,from,actions,admin_creator,icon,likes{id,name,profile_type,pic},can_reply_privately,shares,status_type,promotion_status";
-            
-            //for metric insights
-            $metric ="page_impressions";
-            
-            //for page info
-            //$user = $this->api->get('/me/accounts?fields='.$params);
- 			
- 			//for feeds page info
-            // $page = $this->api->get('/'.$page_id.'/feed?fields='.$params, $this->getPageAccessToken($page_id));
-
- 			$insight = $this->api->get('/'.$page_id.'/insights/'.$metric, $this->getPageAccessToken($page_id));
-            
-            // dd($page);
-            dd($insight);
- 
-        } catch (FacebookSDKException $e) {
- 			// dd($e);
-        }
- 
-    }
 }
